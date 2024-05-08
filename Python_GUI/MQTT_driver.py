@@ -1,4 +1,4 @@
-import paho.mqtt.client as paho # pip install paho
+import paho.mqtt.client as paho # pip install paho-mqtt
 from paho import mqtt
 import time
 

@@ -116,8 +116,8 @@ def ShowPassword():
         E2.config(show="")
         is_on = True
 
-show = PhotoImage(file = "show.png")
-hide = PhotoImage(file = "hide.png")
+show = PhotoImage(file = "Python_GUI/show.png")
+hide = PhotoImage(file = "Python_GUI/hide.png")
 
 H1 = Label(root, text="Register your device", fg=magenta)
 H1.config(font=("Dotum", 24 ))

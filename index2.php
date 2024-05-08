@@ -9,7 +9,7 @@ $port = 8883;                     // change if necessary
 $username = 'PHPclient';                   // set your username
 $password = 'PHPpassw#3';                   // set your password
 $client_id = 'phpMQTT-publisher'; // make sure this is unique for connecting to sever - you could use uniqid()
-$cafile = 'C:\Users\kmich\Desktop\studia\podstawy telemedycyny\projekt\isrgrootx1.pem'; // HiveMQ Cloud CA
+$cafile = 'C:\Users\kmich\Desktop\studia\podstawy telemedycyny\projekt\github\telemed_projekt\isrgrootx1.pem'; // HiveMQ Cloud CA
 
 $mqtt = new Bluerhinos\phpMQTT($server, $port, $client_id, $cafile);
 

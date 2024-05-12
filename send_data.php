@@ -58,7 +58,7 @@ function procMsg($topic, $msg){
 
     $servername = "mysql.agh.edu.pl";
     $username = "mikozak";
-    $password = "5i5SvXSpTr4aBUgP";
+    $password = ""; //password for phpmyadmin
     $dbname = "mikozak";
 
     $conn = mysqli_connect($servername, $username, $password, $dbname);

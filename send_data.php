@@ -26,7 +26,7 @@ $topics['hc_data'] = array('qos' => 0, 'function' => 'procMsg');
 $mqtt->subscribe($topics, 0);
 
 while($mqtt->proc()) {
-
+    sleep(2);
 }
 
 function procMsg($topic, $msg){
@@ -37,7 +37,7 @@ function procMsg($topic, $msg){
 
     $obj = json_decode($msg, true);
 
-    $device_id = $obj["deviceID"];
+    $device_id = $obj["deviceId"];
     if ($topic == "dht_data"){
         $data1 = $obj["temperature"];
         $data2 = $obj["humidity"];
@@ -50,11 +50,14 @@ function procMsg($topic, $msg){
     }
     
     $timestamp_str = $obj["timestamp"];
-    $yy = substr($timestamp_str, strrpos($timestamp_str,"-")+1, 4);
-    $mm = substr($timestamp_str, strpos($timestamp_str,"-"), 3);
-    $dd = substr($timestamp_str, 0, 2);
-    $acq_date = $yy.$mm."-".$dd;
-    $acq_time = chop($timestamp_str); // jak nie to escape string
+    // $yy = substr($timestamp_str, strrpos($timestamp_str,"-")+1, 4);
+    // $mm = substr($timestamp_str, strpos($timestamp_str,"-"), 3);
+    // $dd = substr($timestamp_str, 0, 2);
+    // $acq_date = $yy.$mm."-".$dd;
+    $acq_date = substr($timestamp_str, 0, 10);
+    $acq_time = substr($timestamp_str, 11); // jak nie to escape string
+    //echo $acq_date."\n";
+    //echo $acq_time;
 
     $servername = "mysql.agh.edu.pl";
     $username = "mikozak";
@@ -67,33 +70,49 @@ function procMsg($topic, $msg){
         die("Connection falied: ".mysqli_connect_error());
     }
     
-    if ($topic == "dht_data"){
-        $sql1 = "INSERT INTO `telemed_data` (`device_ID`, `acq_date`, `acq_time`, `data_type`, `data`) 
-            VALUES (`".$device_id."`, `".$acq_date."`, `".$acq_time."`, `".$data_type1."`, `".$data1."`)";
-        $sql2 = "INSERT INTO `telemed_data` (`device_ID`, `acq_date`, `acq_time`, `data_type`, `data`) 
-            VALUES (`".$device_id."`, `".$acq_date."`, `".$acq_time."`, `".$data_type2."`, `".$data2."`)";
-        
-        if(mysqli_query($conn, $sql1)){
-            echo "Dopisano!";
-        } else {
-            echo "Błąd: " .$sql1. "\n".mysqli_error($conn);
-        }
-        if(mysqli_query($conn, $sql2)){
-            echo "Dopisano!";
-        } else {
-            echo "Błąd: " .$sql2. "\n".mysqli_error($conn);
-        }
+    $sql_check = "SELECT EXISTS(SELECT 1 FROM telemed_data WHERE 
+        (device_ID='$device_id') AND (acq_date='$acq_date') AND (acq_time='$acq_time') AND (data_type='$data_type1')) as check_if";
+    $query = mysqli_query($conn, $sql_check);
+    if($query){
+        echo "Sprawdzono\n";
+        //echo mysqli_fetch_assoc($query)["check_if"]."\n";
+    } else {
+        echo "Błąd: " .$sql_check. "\n".mysqli_error($conn);
     }
 
-    if ($topic == "hc_data"){
-        $sql1 = "INSERT INTO `telemed_data` (`device_ID`, `acq_date`, `acq_time`, `data_type`, `data`) 
-            VALUES (`".$device_id."`, `".$acq_date."`, `".$acq_time."`, `".$data_type1."`, `".$data1."`)";
-        
-        if(mysqli_query($conn, $sql1)){
-            echo "Dopisano!";
-        } else {
-            echo "Błąd: " .$sql1. "\n".mysqli_error($conn);
+    if(mysqli_fetch_assoc($query)["check_if"] == 0){
+        if ($topic == "dht_data"){
+            $sql1 = "INSERT INTO telemed_data (device_ID, acq_date, acq_time, data_type, data) 
+                VALUES ('$device_id', '$acq_date', '$acq_time', '$data_type1', '$data1')";
+
+            $sql2 = "INSERT INTO telemed_data (device_ID, acq_date, acq_time, data_type, data) 
+                VALUES ('$device_id', '$acq_date', '$acq_time', '$data_type2', '$data2')";
+            
+            if(mysqli_query($conn, $sql1)){
+                echo "Dopisano ".$data_type1."!\n";
+            } else {
+                echo "Błąd: " .$sql1. "\n".mysqli_error($conn);
+            }
+            if(mysqli_query($conn, $sql2)){
+                echo "Dopisano ".$data_type2."!\n";
+            } else {
+                echo "Błąd: " .$sql2. "\n".mysqli_error($conn);
+            }
         }
+
+        if ($topic == "hc_data"){
+            $sql1 = "INSERT INTO telemed_data (device_ID, acq_date, acq_time, data_type, data) 
+                VALUES ('$device_id', '$acq_date', '$acq_time', '$data_type1', '$data1')";
+            
+            if(mysqli_query($conn, $sql1)){
+                echo "Dopisano ".$data_type1."!\n";
+            } else {
+                echo "Błąd: " .$sql1. "\n".mysqli_error($conn);
+            }
+        }
+    }
+    else{
+        echo "Rekord dla tych danych już istnieje w bazie.\n";
     }
 }
 

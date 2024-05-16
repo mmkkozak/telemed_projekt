@@ -30,7 +30,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 
 $servername = "mysql.agh.edu.pl";
 $username = "mikozak";
-$pass = "5i5SvXSpTr4aBUgP";
+$pass = ""; //password to phpmyadmin
 $dbname = "mikozak";
 
 $dbconn = mysqli_connect($servername, $username, $pass, $dbname);

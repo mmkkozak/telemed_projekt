@@ -1,4 +1,4 @@
-___Architektura projektu____
+__Architektura projektu__
 
 1. Kod źródłowy dla urządzeń IoT wraz z dokumentacją
 
